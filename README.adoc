@@ -1,7 +1,7 @@
-= XSLT Transformer Policy
+= XML to JSON Transformation Policy
 
-https://github.com/gravitee-io/gravitee-policy-xslt[Source code],
-image:http://build.gravitee.io/jenkins/buildStatus/icon?job=gravitee-policy-xslt["Build status", link="http://build.gravitee.io/jenkins/job/gravitee-policy-xslt/"]
+https://github.com/gravitee-io/gravitee-policy-xml-json[Source code],
+image:http://build.gravitee.io/jenkins/buildStatus/icon?job=gravitee-policy-xml-json["Build status", link="http://build.gravitee.io/jenkins/job/gravitee-policy-xml-json/"]
 
 == Scope
 
@@ -36,7 +36,7 @@ You can configure the policy with the following options :
 [source, json]
 .Sample
 ----
-"xslt": {
+"xml-json": {
   "todo": true
 }
 ----
