@@ -24,7 +24,6 @@ import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.stream.BufferedReadWriteStream;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
-import io.gravitee.gateway.api.stream.SimpleReadWriteStream;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.annotations.OnResponse;
 import io.gravitee.policy.api.annotations.OnResponseContent;
@@ -44,11 +43,11 @@ public class XmlToJsonTransformationPolicy {
     @OnResponseContent
     public ReadWriteStream onResponseContent(Response response) {
         return new BufferedReadWriteStream() {
-            StringBuffer buffer = new StringBuffer();
+            Buffer buffer = Buffer.buffer();
 
             @Override
-            public SimpleReadWriteStream<Buffer> write(Buffer chunk) {
-                buffer.append(chunk.toString());
+            public BufferedReadWriteStream write(Buffer chunk) {
+                buffer.appendBuffer(chunk);
                 return this;
             }
 
