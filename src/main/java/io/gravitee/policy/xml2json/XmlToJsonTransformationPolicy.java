@@ -16,14 +16,11 @@
 package io.gravitee.policy.xml2json;
 
 import io.gravitee.common.http.MediaType;
-import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.stream.TransformableStreamBuilder;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
-import io.gravitee.policy.api.PolicyChain;
-import io.gravitee.policy.api.annotations.OnResponse;
 import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.xml2json.transformer.JSONException;
 import io.gravitee.policy.xml2json.transformer.XML;
@@ -33,11 +30,6 @@ import io.gravitee.policy.xml2json.transformer.XML;
  * @author GraviteeSource Team
  */
 public class XmlToJsonTransformationPolicy {
-
-    @OnResponse
-    public void onResponse(Request request, Response response, PolicyChain policyChain) {
-        policyChain.doNext(request, response);
-    }
 
     @OnResponseContent
     public ReadWriteStream onResponseContent(Response response) {
