@@ -19,7 +19,7 @@ import io.gravitee.common.http.MediaType;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
-import io.gravitee.gateway.api.http.stream.TransformableResponseStream;
+import io.gravitee.gateway.api.http.stream.TransformableStreamBuilder;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.policy.api.PolicyChain;
@@ -41,21 +41,16 @@ public class XmlToJsonTransformationPolicy {
 
     @OnResponseContent
     public ReadWriteStream onResponseContent(Response response) {
-        return new TransformableResponseStream(response) {
-
-            @Override
-            protected String to() {
-                return MediaType.APPLICATION_JSON;
-            }
-
-            @Override
-            protected Buffer transform() throws TransformationException {
-                try {
-                    return Buffer.buffer(XML.toJSONObject(buffer.toString()).toString());
-                } catch (JSONException ex) {
-                    throw new TransformationException("Unable to transform into JSON: " + ex.getMessage(), ex);
-                }
-            }
-        };
+        return TransformableStreamBuilder
+                .on(response)
+                .contentType(MediaType.APPLICATION_JSON)
+                .transform(input -> {
+                    try {
+                        return Buffer.buffer(XML.toJSONObject(input.toString()).toString());
+                    } catch (JSONException ex) {
+                        throw new TransformationException("Unable to transform into JSON: " + ex.getMessage(), ex);
+                    }
+                })
+                .build();
     }
 }
