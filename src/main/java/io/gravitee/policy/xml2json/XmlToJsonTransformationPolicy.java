@@ -15,18 +15,17 @@
  */
 package io.gravitee.policy.xml2json;
 
-import io.gravitee.common.http.HttpHeaders;
-import io.gravitee.common.http.HttpHeadersValues;
-import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.common.http.MediaType;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
-import io.gravitee.gateway.api.stream.BufferedReadWriteStream;
+import io.gravitee.gateway.api.http.stream.TransformableResponseStream;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
+import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.annotations.OnResponse;
 import io.gravitee.policy.api.annotations.OnResponseContent;
+import io.gravitee.policy.xml2json.transformer.JSONException;
 import io.gravitee.policy.xml2json.transformer.XML;
 
 /**
@@ -42,35 +41,20 @@ public class XmlToJsonTransformationPolicy {
 
     @OnResponseContent
     public ReadWriteStream onResponseContent(Response response) {
-        return new BufferedReadWriteStream() {
-            Buffer buffer = Buffer.buffer();
+        return new TransformableResponseStream(response) {
 
             @Override
-            public BufferedReadWriteStream write(Buffer chunk) {
-                buffer.appendBuffer(chunk);
-                return this;
+            protected String to() {
+                return MediaType.APPLICATION_JSON;
             }
 
             @Override
-            public void end() {
-                String content;
-
+            protected Buffer transform() throws TransformationException {
                 try {
-                    content = XML.toJSONObject(buffer.toString()).toString();
-                    response.headers().set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-                } catch (Exception ex) {
-                    content = ex.getMessage();
-
-                    response.status(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-                    response.headers().set(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-                    response.headers().set(HttpHeaders.CONNECTION, HttpHeadersValues.CONNECTION_CLOSE);
+                    return Buffer.buffer(XML.toJSONObject(buffer.toString()).toString());
+                } catch (JSONException ex) {
+                    throw new TransformationException("Unable to transform into JSON: " + ex.getMessage(), ex);
                 }
-
-                response.headers().remove(HttpHeaders.TRANSFER_ENCODING);
-                response.headers().set(HttpHeaders.CONTENT_LENGTH, Integer.toString(content.length()));
-
-                super.write(Buffer.buffer(content));
-                super.end();
             }
         };
     }
